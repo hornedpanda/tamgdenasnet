@@ -15,7 +15,7 @@ class Command(BaseCommand):
                 peace = country.peace.get(year=2022).rating
                 demo = country.democracy.get(year=2022).rating
                 cost = max_cost - country.cost.get(year=2023).rating
-                if cost > 70:
+                if cost > 80:
                     continue
                 # climate = country.climate.get(year=2023).rating
                 climate = 0
