@@ -1,136 +1,73 @@
 from django.db import models
+from django.utils.text import slugify
 
 # Create your models here.
 
 
 class Country(models.Model):
     name = models.CharField(max_length=200, unique=True)
+    slug = models.SlugField(max_length=200, unique=True)
+
+    def save(self, *args, **kwargs):
+        self.slug = slugify(self.name)
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return self.name
 
 
-class AbstractRatingModel(models.Model):
-    rating = models.PositiveSmallIntegerField()
+class Rating(models.Model):
+    name = models.CharField(max_length=200, unique=True)
+    slug = models.SlugField(max_length=200, unique=True)
+    decreasing = models.BooleanField()
+
+    def save(self, *args, **kwargs):
+        self.slug = slugify(self.name)
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return self.name
+
+
+class Country_Rating(models.Model):
+    country = models.ForeignKey(
+        Country,
+        on_delete=models.CASCADE,
+        related_name='country_rating',
+        )
+    rating = models.ForeignKey(
+        Rating,
+        on_delete=models.CASCADE,
+        related_name='country_rating',
+        )
+    # place = models.PositiveSmallIntegerField()
     value = models.FloatField()
     year = models.PositiveSmallIntegerField()
 
     class Meta:
-        abstract = True
-
-    def __str__(self):
-        return self.text
-
-
-class Peace(models.Model):
-    rating = models.PositiveSmallIntegerField()
-    value = models.FloatField()
-    # country = models.ForeignKey(
-    #     Country,
-    #     on_delete=models.CASCADE,
-    #     related_name='peace',
-    #     unique=True
-    # )
-    country = models.ForeignKey(
-        Country,
-        on_delete=models.CASCADE,
-        related_name='peace',
-        # primary_key=True
-        )
-    year = models.PositiveSmallIntegerField()
-
-    class Meta:
         constraints = [
-            models.UniqueConstraint(fields=['country', 'year'],
-                                    name='unique_country_year'),
+            models.UniqueConstraint(fields=['country', 'rating', 'year'],
+                                    name='unique_country_rating_year'),
         ]
 
     def __str__(self):
-        return (f"{self.country.name} занимает {self.rating}"
-                f" строчку в Global Peace Index в {self.year} году") 
+        return (f"{self.country.name} имеет {self.value}"
+                f" баллов в рейтинге {self.rating.name} в {self.year} году")
+    
+    def get_place(self):
+        records = Country_Rating.objects.filter(
+            rating=self.rating).filter(year=self.year).order_by(
+            '-value' if self.rating.decreasing == 0 else 'value')
+        k = 1
+        for record in records:
+            if record.country == self.country:
+                countries_count = records.count()
+                koef = 100 - round(k/countries_count*100)
+                return (f"{self.country.name} занимает {k} место из {records.count()}"
+                        f" в рейтинге {self.rating.name} ({koef}%) в {self.year} году")
+            else:
+                k += 1
+        # place = records.get(country=self.country).record.place
+        return (None)
 
 
-class Democracy(models.Model):
-    rating = models.PositiveSmallIntegerField(default=0)
-    value = models.FloatField()
-    country = models.ForeignKey(
-        Country,
-        on_delete=models.CASCADE,
-        related_name='democracy',
-        )
-    year = models.PositiveSmallIntegerField()
-
-    class Meta:
-        constraints = [
-            models.UniqueConstraint(fields=['country', 'year'],
-                                    name='unique_country_year'),
-        ]
-
-    def __str__(self):
-        return (f"{self.country.name} занимает {self.rating} строчку в"
-                f" Democracy Index в {self.year} году")
-
-
-class Cost(models.Model):
-    rating = models.PositiveSmallIntegerField(default=0)
-    cost_index = models.FloatField()
-    country = models.ForeignKey(
-        Country,
-        on_delete=models.CASCADE,
-        related_name='cost',
-        )
-    year = models.PositiveSmallIntegerField()
-    rent_index = models.FloatField()
-    cost_rent_index = models.FloatField()
-    salary = models.FloatField()
-
-    class Meta:
-        constraints = [
-            models.UniqueConstraint(fields=['country', 'year'],
-                                    name='unique_country_year'),
-        ]
-
-    # def get_rating(self, field):
-    #     return 
-
-    def __str__(self):
-        return (f"{self.country.name} занимает {self.rating} строчку в"
-                f" Cost of Living Index в {self.year} году")
-
-
-class Quality(models.Model):
-    rating = models.PositiveSmallIntegerField(default=0)
-    value = models.FloatField()
-    country = models.ForeignKey(
-        Country,
-        on_delete=models.CASCADE,
-        related_name='quality',
-        )
-    year = models.PositiveSmallIntegerField()
-
-    class Meta:
-        constraints = [
-            models.UniqueConstraint(fields=['country', 'year'],
-                                    name='unique_country_year'),
-        ]
-
-    def __str__(self):
-        return (f"{self.country.name} занимает {self.rating} строчку в"
-                f" Quality of Life Index в {self.year} году")
-
-
-class Climate(AbstractRatingModel):
-
-    country = models.ForeignKey(
-        Country,
-        on_delete=models.CASCADE,
-        related_name='climate',
-        # primary_key=True
-        )
-
-    class Meta:
-        constraints = [
-            models.UniqueConstraint(fields=['country', 'year'],
-                                    name='unique_country_year'),
-        ]
-
-    def __str__(self):
-        return (f"{self.country.name} занимает {self.rating} строчку в"
-                f" Quality of Life Index Climate в {self.year} году")
