@@ -4,15 +4,17 @@
   {{rating}}
 {% endblock %}
 {% block content %}
-  {% for country in countries %}
-    <ul>
-      <li>
-        <b>{{forloop.counter}}</b> {{country}}
-      </li>
-      
-    </ul>
-    <p></p>    
-
-
-  {% endfor %} 
+  <div class="row justify-content-center">
+    <div class="col-md-8 p-5">
+      <h4>Рейтинг {{rating}} {{year}} года </h4>
+      <p></p>
+      {% for country in page_obj %}
+        <ul>
+            <b>{{forloop.counter0|add:start_index}}.</b> {{country}}
+        </ul>
+        <p></p>    
+      {% endfor %} 
+      {% include 'includes/paginator.html' %}
+    </div> <!-- col -->
+  </div> <!-- row -->
 {% endblock %}

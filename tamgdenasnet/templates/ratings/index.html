@@ -8,14 +8,9 @@
     <div class="col-md-8 p-5">
       {% for country in page_obj %}
       <ul>
-        
           <b>{{forloop.counter0|add:start_index}}.</b> {{country}}
-        
-        
       </ul>
       <p></p>    
-      
-      
       {% endfor %} 
       {% include 'includes/paginator.html' %}
     </div> <!-- col -->

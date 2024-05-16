@@ -8,5 +8,7 @@ urlpatterns = [
     path('', views.index),
     path('index/', views.index, name='index'),
     path('rating/<slug:slug>/', views.rating_detail),
+    path('rating/<slug:slug>/<int:year>/', views.rating_detail),
     path('country/<slug:slug>/', views.country_detail),
+    path('country/<slug:slug>/<int:year>/', views.country_detail),
 ] 
