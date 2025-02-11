@@ -63,8 +63,13 @@ class Country_Rating(models.Model):
             if record.country == self.country:
                 countries_count = records.count()
                 koef = 100 - round(k/countries_count*100)
-                return (f"{self.country.name} занимает {k} место из {records.count()}"
-                        f" в рейтинге {self.rating.name} ({koef}%) в {self.year} году")
+                # return (f"{k} место из {records.count()} ({koef}%)")
+                place = {
+                    'place': k,
+                    'overall': records.count(),
+                    'koef': koef
+                }
+                return place
             else:
                 k += 1
         # place = records.get(country=self.country).record.place

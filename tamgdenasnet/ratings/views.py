@@ -6,15 +6,18 @@ from django.db.models import Max
 
 from django.http import HttpResponse
 from .models import Country, Rating, Country_Rating
+from .forms import RatingForm
 
 
 # Главная
 def index(request):
     template = 'ratings/index.html'
-    title = 'Список стран'
+    title = 'Там, где нас нет'
     year = 2023
-    rating_name = 'Global Peace Index GPI'
+    rating_name = 'Numbeo Cost of Living Index'
     rating = Rating.objects.get(name=rating_name)
+    # rating = Rating.objects.get(pk=1)
+    form = RatingForm(instance=rating)
     # print(rating)
     # if Country_Rating.objects.get(name='rating_name')
     # countries = Country.objects.all()[:100]
@@ -38,7 +41,8 @@ def index(request):
         # 'text': 'Тут табличка',
         'page_obj': page_obj,
         'start_index': page_obj.start_index(),
-        'year': year
+        'year': year,
+        'form': form
     }
     # Третьим параметром передаём словарь context
     return render(request, template, context)
@@ -71,9 +75,11 @@ def country_detail(request, **kwargs):
     template = 'ratings/country_detail.html'
     country = get_object_or_404(Country, slug=kwargs['slug'])
     # if kwargs['year']:
+    rating_sum = 0
+    rating_avg = 0
+    rating_count = 0
     year = kwargs.setdefault('year',
-        Country_Rating.objects.aggregate(Max('year'))['year__max']
-        )
+        Country_Rating.objects.aggregate(Max('year'))['year__max'])
     # else:
     # year = Country_Rating.objects.aggregate(Max('year'))['year__max']
     # year = year['year__max']
@@ -83,9 +89,13 @@ def country_detail(request, **kwargs):
         # print(country_rating.get_place())
         country_rating.place = country_rating.get_place()
         country_rating.save()
+        rating_sum = rating_sum + country_rating.place['koef']
+        rating_count += 1
+    rating_avg = rating_sum/rating_count
     context = {
         'country': country,
         'country_ratings': country_ratings,
-        'year': year
+        'year': year,
+        'rating_avg': rating_avg
     }
     return render(request, template, context)

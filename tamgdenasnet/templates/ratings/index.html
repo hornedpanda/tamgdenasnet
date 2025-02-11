@@ -8,7 +8,20 @@
     <div class="col-md-8 p-5">
       {% for country in page_obj %}
       <ul>
-          <b>{{forloop.counter0|add:start_index}}.</b> {{country}}
+          <b>{{forloop.counter0|add:start_index}}.</b> 
+          {% comment %} {{country}} {% endcomment %}
+          <a href="{% url 'ratings:country' country.country.slug country.year %}">
+            {{country.country.name}}
+          </a>
+          имеет
+          {{country.value}}
+          баллов в рейтинге
+          <a href="{% url 'ratings:rating' country.rating.slug country.year %}">
+          {{country.rating}}
+          </a>
+          в
+          {{country.year}}
+          году
       </ul>
       <p></p>    
       {% endfor %} 

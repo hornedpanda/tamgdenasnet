@@ -1,20 +1,35 @@
 ﻿<!-- country_detail.html --> 
 {% extends 'base.html' %}
 {% block title %}
-  {{country}}
+  Рейтинги {{country}}
 {% endblock %}
 {% block content %}
   <div class="row justify-content-center">
     <div class="col-md-8 p-5">
-      <h4>Рейтинги страны {{country}} {{year}} года </h4>
+      <h4>Рейтинги страны {{country}} в {{year}} году </h4>
       {% for rating in country_ratings %}
         <ul>
           <li>
-            {{rating.place}}
+            <a href="{% url 'ratings:country' country.slug year %}">
+            {{country}}
+            </a>
+            занимает
+            {{rating.place.place}}
+            место из 
+            {{rating.place.overall}}
+            ({{rating.place.koef}}%)
+            в рейтинге
+            <a href="{% url 'ratings:rating' rating.rating.slug rating.year %}">
+            {{rating.rating.name}}
+            в 
+            {{rating.year}}
+            году
+            </a>
           </li>
         </ul>
         <p></p>    
       {% endfor %} 
+      Средний рейтинг - {{rating_avg}}%
     </div>
   </div>
 {% endblock %}
